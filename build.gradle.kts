@@ -41,9 +41,9 @@ repositories {
 }
 
 dependencies {
-    implementation ("net.botwithus.rs3:botwithus-api:1.0.0-20231112.012705-1")
-    implementation("net.botwithus.xapi.public:botwithusx-api:1.0.0-20231113.032104-1")
-    "includeInJar"("net.botwithus.xapi.public:botwithusx-api:1.0.0-20231113.032104-1")
+    implementation("net.botwithus.rs3:botwithus-api:1.0.0-SNAPSHOT")
+    implementation("net.botwithus.xapi.public:botwithusx-api:1.0.0-SNAPSHOT")
+    "includeInJar"("net.botwithus.xapi.public:botwithusx-api:1.0.0-SNAPSHOT")
     implementation("org.jetbrains.kotlin:kotlin-stdlib:1.9.0")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.1")
     testImplementation(kotlin("test"))
