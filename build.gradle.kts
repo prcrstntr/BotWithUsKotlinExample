@@ -32,6 +32,12 @@ tasks.named<Jar>("jar") {
     finalizedBy(copyJar)
 }
 
+tasks.withType<JavaCompile> {
+    sourceCompatibility = "20"
+    targetCompatibility = "20"
+    options.compilerArgs.add("--enable-preview")
+}
+
 repositories {
     mavenLocal()
     mavenCentral()

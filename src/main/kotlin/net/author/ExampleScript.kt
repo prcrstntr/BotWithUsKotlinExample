@@ -36,7 +36,7 @@ class ExampleScript(
         super.initialize()
         // Set the script graphics context to our custom one
         this.sgc = ExampleGraphicsContext(this, console)
-        console.addLineToConsole("My script loaded!")
+        println("My script loaded!")
         return true;
     }
 
@@ -56,7 +56,7 @@ class ExampleScript(
                 return
             }
             else -> {
-                console.addLineToConsole("Unexpected bot state, report to author!")
+                println("Unexpected bot state, report to author!")
             }
         }
         Execution.delay(random.nextLong(2000,4000))
@@ -72,6 +72,7 @@ class ExampleScript(
         } else {
             val sceneObject: SceneObject? = SceneObjectQuery.newQuery().name("Bank chest").option("Use").results().nearest()
             sceneObject?.interact("Use")
+            botState = BotState.SKILLING;
         }
         return random.nextLong(1000,3000)
     }
