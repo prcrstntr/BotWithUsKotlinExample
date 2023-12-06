@@ -1,9 +1,12 @@
 package net.author
 
+import net.botwithus.api.game.combat.AttackType
 import net.botwithus.api.game.hud.inventories.Backpack
 import net.botwithus.api.game.hud.inventories.Bank
 import net.botwithus.internal.scripts.ScriptDefinition
 import net.botwithus.rs3.game.Client
+import net.botwithus.rs3.game.skills.Skills
+import net.botwithus.rs3.game.queries.builders.characters.NpcQuery
 import net.botwithus.rs3.game.queries.builders.objects.SceneObjectQuery
 import net.botwithus.rs3.game.scene.entities.characters.player.Player
 import net.botwithus.rs3.game.scene.entities.`object`.SceneObject
@@ -12,7 +15,9 @@ import net.botwithus.rs3.imgui.NativeInteger
 import net.botwithus.rs3.script.Execution
 import net.botwithus.rs3.script.LoopingScript
 import net.botwithus.rs3.script.config.ScriptConfig
-import java.util.Random
+
+import java.util.*
+
 
 class ExampleScript(
     name: String,
@@ -24,19 +29,22 @@ class ExampleScript(
     var botState: BotState = BotState.IDLE
     var bankPreset: NativeInteger = NativeInteger(1)
     var doSomething: NativeBoolean = NativeBoolean(false)
+    var mobToKill: String = ""
+
 
     enum class BotState {
         IDLE,
         SKILLING,
         BANKING,
-        //etc..
+        KILLING,
+    //etc..
     }
 
     override fun initialize(): Boolean {
         super.initialize()
         // Set the script graphics context to our custom one
         this.sgc = ExampleGraphicsContext(this, console)
-        println("My script loaded!")
+        println("Time to kill!")
         return true;
     }
 
@@ -55,7 +63,16 @@ class ExampleScript(
                 Execution.delay(handleBanking(player))
                 return
             }
+            BotState.KILLING -> {
+                Execution.delay(handleKilling(player))
+                return
+            }
+            BotState.IDLE -> {
+                Execution.delay(handleIdle(player))
+                return
+            }
             else -> {
+                this.sgc = ExampleGraphicsContext(this, console)
                 println("Unexpected bot state, report to author!")
             }
         }
@@ -68,6 +85,7 @@ class ExampleScript(
             return random.nextLong(1000,2000)
 
         if (Bank.isOpen()) {
+            Bank.depositAll()
             //do bank logic
         } else {
             val sceneObject: SceneObject? = SceneObjectQuery.newQuery().name("Bank chest").option("Use").results().nearest()
@@ -77,11 +95,57 @@ class ExampleScript(
         return random.nextLong(1000,3000)
     }
 
+    private fun handleIdle(player: Player): Long {
+
+        println("currently idle - target "+mobToKill)
+
+        return random.nextLong(1000,3000)
+    }
+
+    private fun handleKilling(player: Player): Long {
+        if (player.isMoving || player.animationId != -1)
+            return random.nextLong(1000,2000)
+
+
+
+        val npcs = NpcQuery.newQuery().name(mobToKill)
+        val mob_index: Int
+        val mob = npcs.results().nearest()
+        this.sgc = ExampleGraphicsContext(this, console)
+        println("loooking for mob to attack " + mobToKill)
+
+        if (mob != null && mob.interact("Attack")) {
+            println("attacking mob " + mob.name)
+            mob_index = mob.id
+            Execution.delayUntil(
+                120000
+            ) {
+                NpcQuery.newQuery().id(mob_index).results().isEmpty
+            }
+        } else {
+            this.sgc = ExampleGraphicsContext(this, console)
+            println("no mob named " + mobToKill)
+            mob_index = -1
+        }
+        if (Skills.DEFENSE.level >= 30){//stops at level 30. Then skills.
+            this.sgc = ExampleGraphicsContext(this, console)
+            println("reached level 30!")
+            botState = BotState.SKILLING;
+        }
+
+        return random.nextLong(1000,3000)
+    }
+
     private fun handleSkilling(player: Player): Long {
+        this.sgc = ExampleGraphicsContext(this, console)
+        println("STARTED SKILLING")
+
         if (player.isMoving || player.animationId != -1)
             return random.nextLong(1000,2000)
         //do something
         if (Backpack.isFull()) {
+            this.sgc = ExampleGraphicsContext(this, console)
+            println("BACKPACK IS FULL")
             botState = BotState.BANKING
         } else {
             //do something! chop a tree, click a rock, etc.
