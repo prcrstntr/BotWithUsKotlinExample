@@ -12,7 +12,6 @@ class ExampleGraphicsContext(
     // Static String for the custom text with a default value of "Cow"
     private val defaultToKill = "Cow"
     private var userInputToKill: String = "Cow"
-    private var boxInputToKill: String = "please help"
 
     // Flag to track whether the button has been pressed
     private var saveButtonPressed = false
@@ -20,8 +19,8 @@ class ExampleGraphicsContext(
 
     override fun drawSettings() {
         super.drawSettings()
-        ImGui.Begin("Thing Killer", 0)
         ImGui.SetWindowSize(250f, -1f)
+        ImGui.Begin("Thing Killer", 0)
         ImGui.Text("Kill Things")
         if (ImGui.Button("Start")) {
             script.botState = ExampleScript.BotState.KILLING;
@@ -33,19 +32,30 @@ class ExampleGraphicsContext(
             script.botState = ExampleScript.BotState.IDLE
 
         }
+
+        if (ImGui.Button("Fishing")) {
+            script.botState = ExampleScript.BotState.FISHING;
+            saveButtonPressed = true
+
+        }
+        ImGui.SameLine()
+        if (ImGui.Button("Stop")) {
+            script.botState = ExampleScript.BotState.IDLE
+
+        }
+
         script.bankPreset.set(ImGui.InputInt("Bank preset", script.bankPreset.get()))
-        script.doSomething.set(ImGui.Checkbox("Do something", script.doSomething.get()))
+        script.pickpocketMode.set(ImGui.Checkbox("Pickpocket Mode", script.pickpocketMode.get()))
 
-
-        boxInputToKill = ImGui.InputText("Mob to Kill", userInputToKill)
+        userInputToKill = ImGui.InputText("Mob to Kill", userInputToKill)
 
         // Button to save the input as a variable
         if (ImGui.Button("Change Mob")) {
-            ScriptConsole.println("Entered: $boxInputToKill")
-            ScriptConsole.println("Prev: $userInputToKill")
+            ScriptConsole.println("Entered: $userInputToKill")
+            ScriptConsole.println("Prev: ${script.mobToKill}")
 
             saveButtonPressed = true
-            userInputToKill = boxInputToKill
+            //userInputToKill = boxInputToKill
         }
         // Check if the button has been pressed and update the stored value
         if (saveButtonPressed) {
